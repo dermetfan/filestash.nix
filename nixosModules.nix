@@ -85,6 +85,25 @@ parts: rec {
                   Only works if `paths.config` is its default value.
                 '';
               };
+
+              connections = mkOption {
+                type = types.listOf (
+                  types.submodule {
+                    freeformType = with types; attrsOf anything;
+
+                    options.password_file = mkOption {
+                      type = with types; nullOr path;
+                      default = null;
+                      description = lib.mdDoc ''
+                        The conection password in the config file will be replaced
+                        with the contents of this file before start.
+                        Only works if `paths.config` is its default value.
+                      '';
+                    };
+                  }
+                );
+                default = [];
+              };
             };
           };
         };
