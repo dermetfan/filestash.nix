@@ -93,23 +93,24 @@ parts: rec {
           };
 
           preStart = let
-            replaceSecret = file: path: ''
-              < ${lib.escapeShellArg file} \
-                ${lib.getExe pkgs.jq} --raw-input \
-                --slurpfile config "$RUNTIME_DIRECTORY"/config.json \
-                '
-                  . as $secret |
-                  $config[] |
-                  ${path} = $secret
-                ' \
-                > "$RUNTIME_DIRECTORY"/config-secret.json
-              mv "$RUNTIME_DIRECTORY"/config{-secret,}.json
-            '';
+            replaceSecret = file: path:
+              lib.optionalString (file != null) ''
+                < ${lib.escapeShellArg file} \
+                  ${lib.getExe pkgs.jq} --raw-input \
+                  --slurpfile config "$RUNTIME_DIRECTORY"/config.json \
+                  '
+                    . as $secret |
+                    $config[] |
+                    ${path} = $secret
+                  ' \
+                  > "$RUNTIME_DIRECTORY"/config-secret.json
+                mv "$RUNTIME_DIRECTORY"/config{-secret,}.json
+              '';
           in
             lib.optionalString (cfg.paths.config == opts.paths.config.default) ''
               cp "$CONFIGURATION_DIRECTORY"/config.json "$RUNTIME_DIRECTORY"/config.json
-              ${replaceSecret cfg.settings.general.secret_key_file ".general.secret_key"}
-              ${replaceSecret cfg.settings.features.api.api_key_file ".features.api.api_key"}
+              ${replaceSecret cfg.settings.general.secret_key_file or null ".general.secret_key"}
+              ${replaceSecret cfg.settings.features.api.api_key_file or null ".features.api.api_key"}
               ${toString (
                 lib.imap0
                 (i: v: replaceSecret v.password_file ".connections[${toString i}].password")
