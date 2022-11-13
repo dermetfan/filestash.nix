@@ -66,10 +66,12 @@ parts: {
             ${checkSecretConfig "admin_password" ".auth.admin"}
             ${checkSecretConfig "connections/LOCAL/password" ".connections[0].password"}
 
-            main.succeed("curl http://127.0.0.1:${toString settings.general.port} -D- --no-progress-meter")
+            main.succeed("stat ${lib.escapeShellArg paths.log}")
+            main.succeed("stat ${lib.escapeShellArg paths.search}")
+            main.wait_until_succeeds("stat ${lib.escapeShellArg paths.db}/share.sql", timeout=5)
+
+            main.wait_until_succeeds("curl http://127.0.0.1:${toString settings.general.port} -D- --no-progress-meter", timeout=5)
             main.succeed("stat ${lib.escapeShellArg paths.log}/access.log")
-            # main.succeed("stat ${lib.escapeShellArg paths.db}")
-            # main.succeed("stat ${lib.escapeShellArg paths.search}")
           ''
           + toString (
             map (v: ''

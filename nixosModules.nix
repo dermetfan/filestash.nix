@@ -148,7 +148,10 @@ parts: rec {
                 mv "$RUNTIME_DIRECTORY"/config{-secret,}.json
               '';
           in
-            lib.optionalString (cfg.paths.config == opts.paths.config.default) ''
+            ''
+              mkdir --parents ${with cfg.paths; lib.escapeShellArgs [db log search]}
+            ''
+            + lib.optionalString (cfg.paths.config == opts.paths.config.default) ''
               cp "$CONFIGURATION_DIRECTORY"/config.json "$RUNTIME_DIRECTORY"/config.json
               ${replaceSecret cfg.settings.general.secret_key_file or null ".general.secret_key"}
               ${replaceSecret cfg.settings.features.api.api_key_file or null ".features.api.api_key"}
