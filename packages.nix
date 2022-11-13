@@ -30,50 +30,47 @@
         .build {
           inherit src version;
 
-          node_modules_attrs = rec {
-            packageJson = lib.pipe "${src}/package.json" [
-              lib.importJSON
-              (
-                p:
-                  p
-                  // {
-                    dependencies =
-                      __mapAttrs
-                      (
-                        k: v:
-                          if lib.hasPrefix "git+" v
-                          then (lib.importJSON packageLockJson).dependencies.${k}.version
-                          else v
-                      )
-                      p.dependencies;
-                  }
-              )
-              builtins.toJSON
-              (pkgs.writeText "package.json")
-              (d: d.outPath)
-            ];
+          node_modules_attrs = let
+            transformJsonFile = file: f:
+              lib.pipe file [
+                lib.importJSON
+                f
+                builtins.toJSON
+                (pkgs.writeText (baseNameOf file))
+                (d: d.outPath)
+              ];
+          in rec {
+            packageJson = transformJsonFile "${src}/package.json" (
+              p:
+                p
+                // {
+                  dependencies =
+                    __mapAttrs
+                    (
+                      k: v:
+                        if lib.hasPrefix "git+" v
+                        then (lib.importJSON packageLockJson).dependencies.${k}.version
+                        else v
+                    )
+                    p.dependencies;
+                }
+            );
 
-            packageLockJson = lib.pipe ./package-lock.json [
-              lib.importJSON
-              (
-                p:
-                  p
-                  // {
-                    dependencies =
-                      __mapAttrs
-                      (
-                        k: v:
-                          if v ? from
-                          then v // {from = v.version;}
-                          else v
-                      )
-                      p.dependencies;
-                  }
-              )
-              builtins.toJSON
-              (pkgs.writeText "package-lock.json")
-              (d: d.outPath)
-            ];
+            packageLockJson = transformJsonFile ./package-lock.json (
+              p:
+                p
+                // {
+                  dependencies =
+                    __mapAttrs
+                    (
+                      k: v:
+                        if v ? from
+                        then v // {from = v.version;}
+                        else v
+                    )
+                    p.dependencies;
+                }
+            );
 
             nodejs = pkgs.nodejs-14_x;
             nativeBuildInputs = [pkgs.python2];
