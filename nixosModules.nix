@@ -1,4 +1,4 @@
-rec {
+parts: rec {
   flake.nixosModules = let
     filestash = "filestash";
   in {
@@ -19,7 +19,7 @@ rec {
 
         package = mkOption {
           type = types.package;
-          default = pkgs.${filestash};
+          default = pkgs.${filestash} or parts.config.flake.packages.${pkgs.system}.default;
         };
 
         paths = {
