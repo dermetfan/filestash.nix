@@ -172,18 +172,18 @@ parts: rec {
 
         environment.etc."${filestash}/config.json" = {
           inherit (cfg) user group;
-          text = lib.generators.toJSON {} (cfg.settings
+          text = lib.generators.toJSON {} (
+            cfg.settings
             // {
               general = removeAttrs cfg.settings.general ["secret_key_file"];
               features = removeAttrs cfg.settings.features ["api_key_file"];
               auth = removeAttrs cfg.settings.auth ["admin_file"];
               connections =
-                map (
-                  v:
-                    removeAttrs v ["password_file"]
-                )
+                map
+                (v: removeAttrs v ["password_file"])
                 cfg.settings.connections;
-            });
+            }
+          );
         };
 
         users = {
