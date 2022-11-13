@@ -1,4 +1,4 @@
-{
+{inputs, ...}: {
   perSystem = {
     lib,
     pkgs,
@@ -23,32 +23,95 @@
       };
     in rec {
       frontend =
-        pkgs.runCommand "filestash-frontend" {
-          inherit version meta;
-          nativeBuildInputs = with pkgs; [cacert nodejs-14_x git strip-nondeterminism];
-          outputHashMode = "recursive";
-          outputHashAlgo = "sha256";
-          outputHash = "sha256-JPUmm4resXPzWgHxUhtCJ9PlG+OfMw8eIZcJaS15uBU=";
-        } ''
-          mkdir home
-          HOME="$PWD/home"
+        (pkgs.extend (final: prev: {
+          npmlock2nix = import inputs.npmlock2nix {pkgs = prev;};
+        }))
+        .npmlock2nix
+        .build {
+          inherit src version;
 
-          cp -r ${src} src
-          cd src
-          chmod -R +w .
+          node_modules_attrs = rec {
+            packageJson = lib.pipe "${src}/package.json" [
+              lib.importJSON
+              (
+                p:
+                  p
+                  // {
+                    dependencies =
+                      __mapAttrs
+                      (
+                        k: v:
+                          if lib.hasPrefix "git+" v
+                          then (lib.importJSON packageLockJson).dependencies.${k}.version
+                          else v
+                      )
+                      p.dependencies;
+                  }
+              )
+              builtins.toJSON
+              (pkgs.writeText "package.json")
+              (d: d.outPath)
+            ];
 
-          cp ${./package-lock.json} .
+            packageLockJson = lib.pipe ./package-lock.json [
+              lib.importJSON
+              (
+                p:
+                  p
+                  // {
+                    dependencies =
+                      __mapAttrs
+                      (
+                        k: v:
+                          if v ? from
+                          then
+                            v
+                            // rec {
+                              from = version;
+                              version = lib.pipe v.version [
+                                # replace git+https with direct github support
+                                (
+                                  vv: let
+                                    prefix = "git+https://github.com/";
+                                  in
+                                    if lib.hasPrefix prefix vv
+                                    then "github:" + lib.removePrefix prefix vv
+                                    else vv
+                                )
+                                # remove .git repo name suffix
+                                (
+                                  vv:
+                                    if lib.hasInfix ".git#" vv
+                                    then __replaceStrings [".git"] [""] vv
+                                    else vv
+                                )
+                              ];
+                            }
+                          else v
+                      )
+                      p.dependencies;
+                  }
+              )
+              builtins.toJSON
+              (pkgs.writeText "package-lock.json")
+              (d: d.outPath)
+            ];
 
-          npm install
-          patchShebangs node_modules/webpack/bin/webpack.js
-          PATH="$PATH:$PWD/node_modules/.bin"
+            nodejs = pkgs.nodejs-14_x;
+            nativeBuildInputs = [pkgs.python2];
 
-          NODE_ENV=production npm run build
+            githubSourceHashMap.mickael-kerjean = {
+              aes-js."76d19e46f762e9a21ab2b58ded409e70434f7610" = "007w7baiz5f75p0bf5mra7aa0l05mgqwavqdajvkr95s1q0rladq";
+              react-selectable."7e2456668bf3e8046271c6795f24ee33c009bdfb" = "0iln75k6h9wddhfgl11mznyaywmmwql3i181781ayqmhcf5q1kwd";
+            };
+          };
 
-          cp -r dist/data/public $out
+          NODE_ENV = "production";
 
-          find $out -exec strip-nondeterminism '{}' \+
-        '';
+          buildCommands = ["npm run build"];
+
+          installPhase = "cp -r dist/data/public $out";
+        };
 
       backend = pkgs.buildGo117Module {
         pname = "filestash-backend";

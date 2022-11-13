@@ -5,12 +5,17 @@
       url = github:hercules-ci/flake-parts;
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
+    npmlock2nix = {
+      url = github:nix-community/npmlock2nix;
+      flake = false;
+    };
   };
 
   outputs = {
     self,
     nixpkgs,
     parts,
+    ...
   }:
     parts.lib.mkFlake {
       inherit self;
