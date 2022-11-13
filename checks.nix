@@ -17,6 +17,7 @@ parts: {
 
         environment.etc = lib.mapAttrs' (k: lib.nameValuePair "filestash/secrets/${k}") {
           secret_key.text = "SECRET_KEY";
+          admin_password.text = "ADMIN_PASSWORD";
           api_key.text = "API_KEY";
           "connections/LOCAL/password".text = "LOCAL_PASSWORD";
         };
@@ -34,6 +35,10 @@ parts: {
               enable = true;
               api_key = "PLACEHOLDER";
               api_key_file = "/etc/filestash/secrets/api_key";
+            };
+            auth = {
+              admin = "PLACEHOLDER";
+              admin_file = "/etc/filestash/secrets/admin_password";
             };
             connections = [
               {
@@ -58,6 +63,7 @@ parts: {
 
             ${checkSecretConfig "secret_key" ".general.secret_key"}
             ${checkSecretConfig "api_key" ".features.api.api_key"}
+            ${checkSecretConfig "admin_password" ".auth.admin"}
             ${checkSecretConfig "connections/LOCAL/password" ".connections[0].password"}
 
             main.succeed("curl http://127.0.0.1:${toString settings.general.port} -D- --no-progress-meter")

@@ -55,14 +55,36 @@ parts: rec {
           type = types.submodule {
             freeformType = with types; attrsOf anything;
 
-            options.general.secret_key_file = mkOption {
-              type = with types; nullOr path;
-              default = null;
-              description = lib.mdDoc ''
-                The secret key in the config file will be replaced
-                with the contents of this file before start.
-                Only works if `paths.config` is its default value.
-              '';
+            options = {
+              general.secret_key_file = mkOption {
+                type = with types; nullOr path;
+                default = null;
+                description = lib.mdDoc ''
+                  The secret key in the config file will be replaced
+                  with the contents of this file before start.
+                  Only works if `paths.config` is its default value.
+                '';
+              };
+
+              features.api.api_key_file = mkOption {
+                type = with types; nullOr path;
+                default = null;
+                description = lib.mdDoc ''
+                  The API key in the config file will be replaced
+                  with the contents of this file before start.
+                  Only works if `paths.config` is its default value.
+                '';
+              };
+
+              auth.admin_file = mkOption {
+                type = with types; nullOr path;
+                default = null;
+                description = lib.mdDoc ''
+                  The admin password in the config file will be replaced
+                  with the contents of this file before start.
+                  Only works if `paths.config` is its default value.
+                '';
+              };
             };
           };
         };
@@ -111,6 +133,7 @@ parts: rec {
               cp "$CONFIGURATION_DIRECTORY"/config.json "$RUNTIME_DIRECTORY"/config.json
               ${replaceSecret cfg.settings.general.secret_key_file or null ".general.secret_key"}
               ${replaceSecret cfg.settings.features.api.api_key_file or null ".features.api.api_key"}
+              ${replaceSecret cfg.settings.auth.admin_file or null ".auth.admin"}
               ${toString (
                 lib.imap0
                 (i: v: replaceSecret v.password_file ".connections[${toString i}].password")
@@ -125,6 +148,7 @@ parts: rec {
             // {
               general = removeAttrs cfg.settings.general ["secret_key_file"];
               features = removeAttrs cfg.settings.features ["api_key_file"];
+              auth = removeAttrs cfg.settings.auth ["admin_file"];
               connections =
                 map (
                   v:
