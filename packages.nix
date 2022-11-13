@@ -64,29 +64,7 @@
                       (
                         k: v:
                           if v ? from
-                          then
-                            v
-                            // rec {
-                              from = version;
-                              version = lib.pipe v.version [
-                                # replace git+https with direct github support
-                                (
-                                  vv: let
-                                    prefix = "git+https://github.com/";
-                                  in
-                                    if lib.hasPrefix prefix vv
-                                    then "github:" + lib.removePrefix prefix vv
-                                    else vv
-                                )
-                                # remove .git repo name suffix
-                                (
-                                  vv:
-                                    if lib.hasInfix ".git#" vv
-                                    then __replaceStrings [".git"] [""] vv
-                                    else vv
-                                )
-                              ];
-                            }
+                          then v // {from = v.version;}
                           else v
                       )
                       p.dependencies;
@@ -99,11 +77,6 @@
 
             nodejs = pkgs.nodejs-14_x;
             nativeBuildInputs = [pkgs.python2];
-
-            githubSourceHashMap.mickael-kerjean = {
-              aes-js."76d19e46f762e9a21ab2b58ded409e70434f7610" = "007w7baiz5f75p0bf5mra7aa0l05mgqwavqdajvkr95s1q0rladq";
-              react-selectable."7e2456668bf3e8046271c6795f24ee33c009bdfb" = "0iln75k6h9wddhfgl11mznyaywmmwql3i181781ayqmhcf5q1kwd";
-            };
           };
 
           NODE_ENV = "production";
