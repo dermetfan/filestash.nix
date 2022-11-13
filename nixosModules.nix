@@ -115,6 +115,12 @@ parts: rec {
           wantedBy = ["multi-user.target"];
           after = ["network.target"];
 
+          restartTriggers = with cfg;
+            map builtins.toJSON [
+              settings
+              paths
+            ];
+
           serviceConfig = {
             User = cfg.user;
             Group = cfg.group;
