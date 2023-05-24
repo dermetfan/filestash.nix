@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "filestash": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1666182059,
+        "narHash": "sha256-wpS3Nozq8NgiaupC9Kg2p/WzlM+7b28+jyXF4z6DkV0=",
+        "owner": "mickael-kerjean",
+        "repo": "filestash",
+        "rev": "bf2bca4cbb5ba57092c51c2163ea04cad987d0f3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mickael-kerjean",
+        "repo": "filestash",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1666424192,
@@ -55,6 +71,7 @@
     },
     "root": {
       "inputs": {
+        "filestash": "filestash",
         "nixpkgs": "nixpkgs",
         "npmlock2nix": "npmlock2nix",
         "parts": "parts"

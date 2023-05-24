@@ -5,6 +5,10 @@
       url = github:hercules-ci/flake-parts;
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
+    filestash = {
+      url = github:mickael-kerjean/filestash;
+      flake = false;
+    };
     npmlock2nix = {
       # https://github.com/nix-community/npmlock2nix/pull/94
       url = github:Sohalt/npmlock2nix/91bdfd4067aa7c0d3133ee157ccd8baf1921ffbb;

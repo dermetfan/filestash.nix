@@ -5,14 +5,8 @@
     ...
   }: {
     packages = let
-      version = "0.5pre";
-      src = pkgs.fetchFromGitHub {
-        owner = "mickael-kerjean";
-        repo = "filestash";
-        # rev = "v${version}";
-        rev = "bf2bca4cbb5ba57092c51c2163ea04cad987d0f3";
-        hash = "sha256-wpS3Nozq8NgiaupC9Kg2p/WzlM+7b28+jyXF4z6DkV0=";
-      };
+      src = inputs.filestash;
+      version = src.shortRev;
 
       meta = with lib; {
         description = "🦄 A modern web client for SFTP, S3, FTP, WebDAV, Git, Minio, LDAP, CalDAV, CardDAV, Mysql, Backblaze, …";
@@ -92,7 +86,7 @@
         subPackages = ["server"];
 
         ldflags = [
-          "-X github.com/mickael-kerjean/filestash/server/common.BUILD_DATE=19700101"
+          "-X github.com/mickael-kerjean/filestash/server/common.BUILD_DATE=${toString src.lastModified}"
           "-X github.com/mickael-kerjean/filestash/server/common.BUILD_REF=${src.rev}"
         ];
 
