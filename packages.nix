@@ -107,6 +107,60 @@
 
         prePatch = "cp -r ${frontend} server/ctrl/static/www";
 
+        /*
+        Mostly taken from https://github.com/MatthewCroughan/filestash-nix:
+        - libtranscode package
+        - libresize package
+        - source injection shell code
+
+        Copyright (c) 2022 Matthew Croughan
+
+        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+        The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+        */
+        postPatch = let
+          libtranscode = pkgs.stdenv.mkDerivation {
+            name = "libtranscode";
+            src = "${src}/server/plugin/plg_image_light/deps/src";
+            buildInputs = with pkgs; [libraw];
+            buildPhase = ''
+              $CC -Wall -c libtranscode.c
+              ar rcs libtranscode.a libtranscode.o
+            '';
+            installPhase = ''
+              mkdir -p $out/lib
+              mv libtranscode.a $out/lib/
+            '';
+          };
+
+          libresize = pkgs.stdenv.mkDerivation {
+            name = "libresize";
+            src = "${src}/server/plugin/plg_image_light/deps/src";
+            buildInputs = with pkgs; [vips glib];
+            nativeBuildInputs = with pkgs; [pkg-config];
+            buildPhase = ''
+              $CC -Wall -c libresize.c $(pkg-config --cflags glib-2.0)
+              ar rcs libresize.a libresize.o
+            '';
+            installPhase = ''
+              mkdir -p $out/lib
+              mv libresize.a $out/lib/
+            '';
+          };
+
+          platform =
+            {
+              aarch64-linux = "linux_arm";
+              x86_64-linux = "linux_amd64";
+            }
+            .${pkgs.hostPlatform.system}
+            or (throw "Unsupported system: ${pkgs.hostPlatform.system}");
+        in ''
+          sed -i 's#-L./deps -l:libresize_${platform}.a#-L${libresize}/lib -l:libresize.a -lvips#'         server/plugin/plg_image_light/lib_resize_${platform}.go
+          sed -i 's#-L./deps -l:libtranscode_${platform}.a#-L${libtranscode}/lib -l:libtranscode.a -lraw#' server/plugin/plg_image_light/lib_transcode_${platform}.go
+        '';
+
         preBuild = "make build_init";
       };
 
