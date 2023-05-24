@@ -84,10 +84,10 @@
 
           buildCommands = ["npm run build"];
 
-          installPhase = "cp -r dist/data/public $out";
+          installPhase = "cp -r server/ctrl/static/www $out";
         };
 
-      backend = pkgs.buildGo117Module {
+      backend = pkgs.buildGo120Module {
         pname = "filestash-backend";
         inherit src version meta;
 
@@ -98,13 +98,14 @@
         ldflags = [
           "-X github.com/mickael-kerjean/filestash/server/common.BUILD_DATE=${toString src.lastModified}"
           "-X github.com/mickael-kerjean/filestash/server/common.BUILD_REF=${src.rev}"
+          "-extldflags=-static"
         ];
 
         tags = ["fts5"];
 
         nativeBuildInputs = with pkgs; [pkgconfig curl];
 
-        CGO_CFLAGS_ALLOW = "-fopenmp";
+        prePatch = "cp -r ${frontend} server/ctrl/static/www";
 
         preBuild = "make build_init";
       };
