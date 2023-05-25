@@ -31,6 +31,10 @@ parts: rec {
             type = types.path;
             default = "/var/lib/${filestash}/db";
           };
+          cert = mkOption {
+            type = types.path;
+            default = "/var/lib/${filestash}/cert";
+          };
           log = mkOption {
             type = types.path;
             default = "/var/log/${filestash}";
@@ -38,6 +42,10 @@ parts: rec {
           search = mkOption {
             type = types.path;
             default = "/var/cache/${filestash}/search";
+          };
+          tmp = mkOption {
+            type = types.path;
+            default = "/var/cache/${filestash}/tmp";
           };
         };
 
@@ -136,6 +144,8 @@ parts: rec {
               pathDb = cfg.paths.db;
               pathLog = cfg.paths.log;
               pathSearch = cfg.paths.search;
+              pathCert = cfg.paths.cert;
+              pathTmp = cfg.paths.tmp;
             }));
           };
 
@@ -155,7 +165,7 @@ parts: rec {
               '';
           in
             ''
-              mkdir --parents ${with cfg.paths; lib.escapeShellArgs [db log search]}
+              mkdir --parents ${with cfg.paths; lib.escapeShellArgs [db log search tmp]}
             ''
             + lib.optionalString (cfg.paths.config == opts.paths.config.default) ''
               cp "$CONFIGURATION_DIRECTORY"/config.json "$RUNTIME_DIRECTORY"/config.json

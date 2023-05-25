@@ -172,6 +172,8 @@
           pathDb = "/proc/self/cwd/state/db";
           pathLog = "/proc/self/cwd/state/log";
           pathSearch = "/proc/self/cwd/state/search";
+          pathCert = "/proc/self/cwd/state/certs";
+          pathTmp = "/proc/self/cwd/cache/tmp";
         } ''
           mkdir -p $out/bin
           ln -s ${backend}/bin/server $out/bin/filestash
@@ -181,12 +183,14 @@
           mkdir -p $out/libexec/filestash
           pushd $out/libexec/filestash
 
-          mkdir -p data/state/config
-          ln -s ${frontend} data/public
+          mkdir -p data/state/config data/cache
+          ln -s ${frontend}   data/public
           ln -s "$pathConfig" data/state/config/config.json
-          ln -s "$pathDb" data/state/db
-          ln -s "$pathLog" data/state/log
+          ln -s "$pathDb"     data/state/db
+          ln -s "$pathLog"    data/state/log
           ln -s "$pathSearch" data/state/search
+          ln -s "$pathCert"   data/state/certs
+          ln -s "$pathTmp"    data/cache/tmp
         '';
 
       default = full;
