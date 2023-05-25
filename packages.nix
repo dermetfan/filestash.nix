@@ -2,6 +2,7 @@
   perSystem = {
     lib,
     pkgs,
+    system,
     ...
   }: {
     packages = let
@@ -33,6 +34,15 @@
                 (pkgs.writeText (baseNameOf file))
                 (d: d.outPath)
               ];
+
+            lenientPkgs = import inputs.nixpkgs {
+              inherit system;
+              config.permittedInsecurePackages = [
+                "nodejs-14.21.3"
+                "openssl-1.1.1t"
+                "python-2.7.18.6"
+              ];
+            };
           in rec {
             packageJson = transformJsonFile "${src}/package.json" (
               p:
@@ -66,8 +76,8 @@
                 }
             );
 
-            nodejs = pkgs.nodejs-14_x;
-            nativeBuildInputs = [pkgs.python2];
+            nodejs = lenientPkgs.nodejs-14_x;
+            nativeBuildInputs = with lenientPkgs; [python2];
           };
 
           NODE_ENV = "production";
