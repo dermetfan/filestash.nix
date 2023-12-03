@@ -55,7 +55,7 @@ parts: {
       testScript = {nodes, ...}:
         with nodes.main.services.filestash; let
           checkSecretConfig = secret: path: ''
-            main.succeed("${lib.getExe pkgs.jq} --exit-status --arg secret ${lib.escapeShellArg nodes.main.environment.etc."filestash/secrets/${secret}".text} '${path} == $secret' ${paths.config}")
+            main.succeed("${lib.getExe' pkgs.jq "jq"} --exit-status --arg secret ${lib.escapeShellArg nodes.main.environment.etc."filestash/secrets/${secret}".text} '${path} == $secret' ${paths.config}")
           '';
         in
           ''

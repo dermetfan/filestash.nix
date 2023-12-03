@@ -153,7 +153,7 @@ parts: rec {
             replaceSecret = file: path:
               lib.optionalString (file != null) ''
                 < ${lib.escapeShellArg file} \
-                  ${lib.getExe pkgs.jq} --raw-input \
+                  ${lib.getExe' pkgs.jq "jq"} --raw-input \
                   --slurpfile config "$RUNTIME_DIRECTORY"/config.json \
                   '
                     . as $secret |

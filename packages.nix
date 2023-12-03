@@ -2,12 +2,20 @@
   perSystem = {
     lib,
     pkgs,
-    system,
     ...
   }: {
     packages = let
       src = inputs.filestash;
       version = src.shortRev;
+
+      packageJson = let
+        orig = lib.importJSON "${src}/package.json";
+      in
+        removeAttrs orig ["devDependencies"]
+        // {
+          dependencies = orig.dependencies // orig.devDependencies;
+        };
+      packageJsonFile = pkgs.writers.writeJSON "package.json" packageJson;
 
       meta = with lib; {
         description = "🦄 A modern web client for SFTP, S3, FTP, WebDAV, Git, Minio, LDAP, CalDAV, CardDAV, Mysql, Backblaze, …";
@@ -17,83 +25,55 @@
         platforms = platforms.linux;
       };
     in rec {
-      frontend =
-        (pkgs.extend (final: prev: {
-          npmlock2nix = import inputs.npmlock2nix {pkgs = prev;};
-        }))
-        .npmlock2nix
-        .build {
-          inherit src version;
+      frontend = pkgs.buildNpmPackage rec {
+        inherit src version meta;
+        pname = "${packageJson.name}-frontend";
 
-          node_modules_attrs = let
-            transformJsonFile = file: f:
-              lib.pipe file [
-                lib.importJSON
-                f
-                builtins.toJSON
-                (pkgs.writeText (baseNameOf file))
-                (d: d.outPath)
-              ];
+        postPatch = ''
+          cp --force ${packageJsonFile} package.json
+          ln --symbolic ${./package-lock.json} package-lock.json
+        '';
 
-            lenientPkgs = import inputs.nixpkgs {
-              inherit system;
-              config.permittedInsecurePackages = [
-                "nodejs-14.21.3"
-                "openssl-1.1.1t"
-                "python-2.7.18.6"
-              ];
-            };
-          in rec {
-            packageJson = transformJsonFile "${src}/package.json" (
-              p:
-                p
-                // {
-                  dependencies =
-                    __mapAttrs
-                    (
-                      k: v:
-                        if lib.hasPrefix "git+" v
-                        then (lib.importJSON packageLockJson).dependencies.${k}.version
-                        else v
-                    )
-                    p.dependencies;
-                }
-            );
+        npmDepsHash = "sha256-yF2IrPfkyKZKghIZfwQy3QyUtXabL13GhU1CLiA65U4=";
+        npmInstallFlags = "--legacy-peer-deps";
+        makeCacheWritable = true;
 
-            packageLockJson = transformJsonFile ./package-lock.json (
-              p:
-                p
-                // {
-                  dependencies =
-                    __mapAttrs
-                    (
-                      k: v:
-                        if v ? from
-                        then v // {from = v.version;}
-                        else v
-                    )
-                    p.dependencies;
-                }
-            );
+        NODE_ENV = "production";
 
-            nodejs = lenientPkgs.nodejs-14_x;
-            nativeBuildInputs = with lenientPkgs; [python2];
-          };
+        nativeBuildInputs = with pkgs; [python3];
 
-          NODE_ENV = "production";
+        installPhase = "cp -r server/ctrl/static/www $out";
 
-          buildCommands = ["npm run build"];
+        passthru.generate-package-lock-json = pkgs.writeShellApplication {
+          name = "generate-package-lock-json";
+          runtimeInputs = with pkgs; [nodejs];
+          text = ''
+            tmp=$(mktemp -d)
+            trap 'rm -r "$tmp"' EXIT
 
-          installPhase = "cp -r server/ctrl/static/www $out";
+            ln --symbolic ${src}/* ${src}/.* "$tmp"/
+            ln --symbolic --force ${packageJsonFile} "$tmp"/package.json
+
+            pushd "$tmp"
+            npm install --package-lock-only ${npmInstallFlags}
+            popd
+
+            mv "$tmp"/package-lock.json .
+          '';
         };
+      };
 
       backend = pkgs.buildGo120Module {
         pname = "filestash-backend";
-        inherit src version meta;
+        inherit src version;
+
+        meta =
+          meta
+          // {
+            mainProgram = "filestash";
+          };
 
         vendorHash = null;
-
-        subPackages = ["server"];
 
         ldflags = [
           "-X github.com/mickael-kerjean/filestash/server/common.BUILD_DATE=${toString src.lastModified}"
@@ -103,69 +83,31 @@
 
         tags = ["fts5"];
 
-        nativeBuildInputs = with pkgs; [pkgconfig curl];
+        excludedPackages = [
+          "server/generator"
+          "server/plugin/plg_starter_http2"
+          "server/plugin/plg_starter_https"
+          "server/plugin/plg_search_sqlitefts"
+        ];
 
-        prePatch = "cp -r ${frontend} server/ctrl/static/www";
+        buildInputs = with pkgs; [vips];
 
-        /*
-        Mostly taken from https://github.com/MatthewCroughan/filestash-nix:
-        - libtranscode package
-        - libresize package
-        - source injection shell code
+        nativeBuildInputs = with pkgs; [pkg-config gotools];
 
-        Copyright (c) 2022 Matthew Croughan
+        prePatch = "cp --recursive ${frontend} server/ctrl/static/www";
 
-        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-        The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-        */
-        postPatch = let
-          libtranscode = pkgs.stdenv.mkDerivation {
-            name = "libtranscode";
-            src = "${src}/server/plugin/plg_image_light/deps/src";
-            buildInputs = with pkgs; [libraw];
-            buildPhase = ''
-              $CC -Wall -c libtranscode.c
-              ar rcs libtranscode.a libtranscode.o
-            '';
-            installPhase = ''
-              mkdir -p $out/lib
-              mv libtranscode.a $out/lib/
-            '';
-          };
-
-          libresize = pkgs.stdenv.mkDerivation {
-            name = "libresize";
-            src = "${src}/server/plugin/plg_image_light/deps/src";
-            buildInputs = with pkgs; [vips glib];
-            nativeBuildInputs = with pkgs; [pkg-config];
-            buildPhase = ''
-              $CC -Wall -c libresize.c $(pkg-config --cflags glib-2.0)
-              ar rcs libresize.a libresize.o
-            '';
-            installPhase = ''
-              mkdir -p $out/lib
-              mv libresize.a $out/lib/
-            '';
-          };
-
-          platform =
-            {
-              aarch64-linux = "linux_arm";
-              x86_64-linux = "linux_amd64";
-            }
-            .${pkgs.hostPlatform.system}
-            or (throw "Unsupported system: ${pkgs.hostPlatform.system}");
-        in ''
-          sed -i 's#-L./deps -l:libresize_${platform}.a#-L${libresize}/lib -l:libresize.a -lvips#'         server/plugin/plg_image_light/lib_resize_${platform}.go
-          sed -i 's#-L./deps -l:libtranscode_${platform}.a#-L${libtranscode}/lib -l:libtranscode.a -lraw#' server/plugin/plg_image_light/lib_transcode_${platform}.go
-        '';
+        # fix "imported and not used" errors
+        postPatch = "goimports -w server";
 
         preBuild = "make build_init";
+
+        postInstall = "rm $out/bin/public";
       };
 
       full =
         pkgs.runCommand "filestash" {
+          inherit (backend) meta;
+
           nativeBuildInputs = [pkgs.makeWrapper];
 
           pathConfig = "/proc/self/cwd/state/config.json";
@@ -176,7 +118,7 @@
           pathTmp = "/proc/self/cwd/cache/tmp";
         } ''
           mkdir -p $out/bin
-          ln -s ${backend}/bin/server $out/bin/filestash
+          ln -s ${backend}/bin/filestash $out/bin/filestash
           wrapProgram $out/bin/filestash \
             --set-default WORK_DIR $out/libexec/filestash
 
