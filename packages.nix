@@ -90,7 +90,12 @@
           "server/plugin/plg_search_sqlitefts"
         ];
 
-        buildInputs = with pkgs; [vips];
+        buildInputs = with pkgs; [
+          vips
+          libjpeg
+          libpng
+          libwebp
+        ];
 
         nativeBuildInputs = with pkgs; [pkg-config gotools];
 
@@ -101,7 +106,10 @@
 
         preBuild = "make build_init";
 
-        postInstall = "rm $out/bin/public";
+        postInstall = ''
+          rm $out/bin/public
+          mv $out/bin/{cmd,filestash}
+        '';
       };
 
       full =
