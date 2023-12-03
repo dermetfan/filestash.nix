@@ -20,7 +20,7 @@
       meta = with lib; {
         description = "🦄 A modern web client for SFTP, S3, FTP, WebDAV, Git, Minio, LDAP, CalDAV, CardDAV, Mysql, Backblaze, …";
         homepage = https://github.com/mickael-kerjean/filestash;
-        license = licenses.agpl3;
+        license = licenses.agpl3Only;
         maintainers = with maintainers; [dermetfan];
         platforms = platforms.linux;
       };
@@ -34,7 +34,7 @@
           ln --symbolic ${./package-lock.json} package-lock.json
         '';
 
-        npmDepsHash = "sha256-yF2IrPfkyKZKghIZfwQy3QyUtXabL13GhU1CLiA65U4=";
+        npmDepsHash = "sha256-NX54LLtaIgbKWhkt6o17hhrK3CFzdDQiGVbUc5/HKes=";
         npmInstallFlags = "--legacy-peer-deps";
         makeCacheWritable = true;
 
@@ -63,7 +63,7 @@
         };
       };
 
-      backend = pkgs.buildGo120Module {
+      backend = pkgs.buildGo121Module {
         pname = "filestash-backend";
         inherit src version;
 
@@ -73,21 +73,17 @@
             mainProgram = "filestash";
           };
 
-        vendorHash = null;
+        vendorHash = "sha256-cbpvwMt3Qp0lmcOrHtkOIFIo9NjstqC/wYUjkckV8f4=";
 
         ldflags = [
           "-X github.com/mickael-kerjean/filestash/server/common.BUILD_DATE=${toString src.lastModified}"
           "-X github.com/mickael-kerjean/filestash/server/common.BUILD_REF=${src.rev}"
-          "-extldflags=-static"
         ];
 
         tags = ["fts5"];
 
         excludedPackages = [
           "server/generator"
-          "server/plugin/plg_starter_http2"
-          "server/plugin/plg_starter_https"
-          "server/plugin/plg_search_sqlitefts"
         ];
 
         buildInputs = with pkgs; [
@@ -95,16 +91,22 @@
           libjpeg
           libpng
           libwebp
+          libraw
+          giflib
+          libheif
         ];
 
         nativeBuildInputs = with pkgs; [pkg-config gotools];
 
         prePatch = "cp --recursive ${frontend} server/ctrl/static/www";
 
+        patches = [./cgo-ldflags.patch];
+        patchFlags = "--strip=0";
+
         # fix "imported and not used" errors
         postPatch = "goimports -w server";
 
-        preBuild = "make build_init";
+        preBuild = "go generate -x ./server/...";
 
         postInstall = ''
           rm $out/bin/public
@@ -123,24 +125,24 @@
           pathLog = "/proc/self/cwd/state/log";
           pathSearch = "/proc/self/cwd/state/search";
           pathCert = "/proc/self/cwd/state/certs";
-          pathTmp = "/proc/self/cwd/cache/tmp";
+          pathTmp = "/proc/self/cwd/cache";
         } ''
           mkdir -p $out/bin
           ln -s ${backend}/bin/filestash $out/bin/filestash
           wrapProgram $out/bin/filestash \
-            --set-default WORK_DIR $out/libexec/filestash
+            --set-default FILESTASH_PATH $out/libexec/filestash
 
           mkdir -p $out/libexec/filestash
           pushd $out/libexec/filestash
 
-          mkdir -p data/state/config data/cache
-          ln -s ${frontend}   data/public
-          ln -s "$pathConfig" data/state/config/config.json
-          ln -s "$pathDb"     data/state/db
-          ln -s "$pathLog"    data/state/log
-          ln -s "$pathSearch" data/state/search
-          ln -s "$pathCert"   data/state/certs
-          ln -s "$pathTmp"    data/cache/tmp
+          mkdir -p state/config
+          ln -s ${frontend}   public
+          ln -s "$pathConfig" state/config/config.json
+          ln -s "$pathDb"     state/db
+          ln -s "$pathLog"    state/log
+          ln -s "$pathSearch" state/search
+          ln -s "$pathCert"   state/certs
+          ln -s "$pathTmp"    cache
         '';
 
       default = full;

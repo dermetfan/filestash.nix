@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = github:NixOS/nixpkgs/nixos-23.11;
+    nixpkgs.url = github:NixOS/nixpkgs/nixos-24.05;
     parts = {
       url = github:hercules-ci/flake-parts;
       inputs.nixpkgs-lib.follows = "nixpkgs";
@@ -11,14 +11,9 @@
     };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    parts,
-    ...
-  }:
+  outputs = inputs @ {parts, ...}:
     parts.lib.mkFlake {
-      inherit self;
+      inherit inputs;
     } ({lib, ...}: {
       systems = [
         "x86_64-linux"

@@ -45,7 +45,7 @@ parts: rec {
           };
           tmp = mkOption {
             type = types.path;
-            default = "/var/cache/${filestash}/tmp";
+            default = "/var/cache/${filestash}";
           };
         };
 

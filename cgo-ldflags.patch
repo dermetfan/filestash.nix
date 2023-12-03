@@ -1,0 +1,42 @@
+diff --git server/plugin/plg_image_c/image_gif.go server/plugin/plg_image_c/image_gif.go
+index 6b20e50b..2248c9be 100644
+--- server/plugin/plg_image_c/image_gif.go
++++ server/plugin/plg_image_c/image_gif.go
+@@ -4 +4 @@ package plg_image_c
+-// #cgo LDFLAGS: -l:libgif.a -l:libwebp.a
++// #cgo LDFLAGS: -lgif -lwebp
+diff --git server/plugin/plg_image_c/image_jpeg.go server/plugin/plg_image_c/image_jpeg.go
+index 235e4139..53d187f1 100644
+--- server/plugin/plg_image_c/image_jpeg.go
++++ server/plugin/plg_image_c/image_jpeg.go
+@@ -4 +4 @@ package plg_image_c
+-// #cgo LDFLAGS: -l:libjpeg.a
++// #cgo LDFLAGS: -ljpeg
+diff --git server/plugin/plg_image_c/image_png.go server/plugin/plg_image_c/image_png.go
+index e87acdaf..a2d43b2b 100644
+--- server/plugin/plg_image_c/image_png.go
++++ server/plugin/plg_image_c/image_png.go
+@@ -4 +4 @@ package plg_image_c
+-// #cgo LDFLAGS: -l:libpng.a -l:libz.a -l:libwebp.a -fopenmp
++// #cgo LDFLAGS: -lpng -lz -lwebp -fopenmp
+diff --git server/plugin/plg_image_c/image_raw.go server/plugin/plg_image_c/image_raw.go
+index e9a0774f..36f1eb7f 100644
+--- server/plugin/plg_image_c/image_raw.go
++++ server/plugin/plg_image_c/image_raw.go
+@@ -4 +4 @@ package plg_image_c
+-// #cgo LDFLAGS: -l:libjpeg.a -l:libraw.a -fopenmp -l:libstdc++.a -llcms2 -lm
++// #cgo LDFLAGS: -ljpeg -lraw -fopenmp -l:libstdc++.a -llcms2 -lm
+diff --git server/plugin/plg_image_c/image_tiff.go server/plugin/plg_image_c/image_tiff.go
+index 0fc770e8..284e1f00 100644
+--- server/plugin/plg_image_c/image_tiff.go
++++ server/plugin/plg_image_c/image_tiff.go
+@@ -4 +4 @@ package plg_image_c
+-// #cgo LDFLAGS: -l:libwebp.a -ltiff
++// #cgo LDFLAGS: -lwebp -ltiff
+diff --git server/plugin/plg_image_c/image_webp.go server/plugin/plg_image_c/image_webp.go
+index 631f973b..e09755fc 100644
+--- server/plugin/plg_image_c/image_webp.go
++++ server/plugin/plg_image_c/image_webp.go
+@@ -4 +4 @@ package plg_image_c
+-// #cgo LDFLAGS: -l:libwebp.a
++// #cgo LDFLAGS: -lwebp
