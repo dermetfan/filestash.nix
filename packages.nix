@@ -118,7 +118,7 @@
         pkgs.runCommand "filestash" {
           inherit (backend) meta;
 
-          nativeBuildInputs = [pkgs.makeWrapper];
+          nativeBuildInputs = [pkgs.makeBinaryWrapper];
 
           pathConfig = "/proc/self/cwd/state/config.json";
           pathDb = "/proc/self/cwd/state/db";
