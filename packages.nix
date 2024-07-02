@@ -42,14 +42,14 @@
 
         nativeBuildInputs = with pkgs; [python3];
 
-        installPhase = "cp -r server/ctrl/static/www $out";
+        installPhase = "cp --recursive server/ctrl/static/www $out";
 
         passthru.generate-package-lock-json = pkgs.writeShellApplication {
           name = "generate-package-lock-json";
           runtimeInputs = with pkgs; [nodejs];
           text = ''
-            tmp=$(mktemp -d)
-            trap 'rm -r "$tmp"' EXIT
+            tmp=$(mktemp --directory)
+            trap 'rm --recursive "$tmp"' EXIT
 
             ln --symbolic ${src}/* ${src}/.* "$tmp"/
             ln --symbolic --force ${packageJsonFile} "$tmp"/package.json
@@ -127,22 +127,22 @@
           pathCert = "/proc/self/cwd/state/certs";
           pathTmp = "/proc/self/cwd/cache";
         } ''
-          mkdir -p $out/bin
-          ln -s ${backend}/bin/filestash $out/bin/filestash
+          mkdir --parents $out/bin
+          ln --symbolic ${backend}/bin/filestash $out/bin/filestash
           wrapProgram $out/bin/filestash \
             --set-default FILESTASH_PATH $out/libexec/filestash
 
-          mkdir -p $out/libexec/filestash
+          mkdir --parents $out/libexec/filestash
           pushd $out/libexec/filestash
 
-          mkdir -p state/config
-          ln -s ${frontend}   public
-          ln -s "$pathConfig" state/config/config.json
-          ln -s "$pathDb"     state/db
-          ln -s "$pathLog"    state/log
-          ln -s "$pathSearch" state/search
-          ln -s "$pathCert"   state/certs
-          ln -s "$pathTmp"    cache
+          mkdir --parents state/config
+          ln --symbolic ${frontend}   public
+          ln --symbolic "$pathConfig" state/config/config.json
+          ln --symbolic "$pathDb"     state/db
+          ln --symbolic "$pathLog"    state/log
+          ln --symbolic "$pathSearch" state/search
+          ln --symbolic "$pathCert"   state/certs
+          ln --symbolic "$pathTmp"    cache
         '';
 
       default = full;
