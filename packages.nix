@@ -1,4 +1,8 @@
-{inputs, ...}: {
+{
+  inputs,
+  config,
+  ...
+}: {
   perSystem = {
     lib,
     pkgs,
@@ -23,6 +27,25 @@
         license = licenses.agpl3Only;
         maintainers = with maintainers; [dermetfan];
         platforms = platforms.linux;
+      };
+
+      nixosOptionsDoc = pkgs.nixosOptionsDoc {
+        inherit
+          (lib.evalModules {
+            modules = [
+              config.flake.nixosModules.filestash
+              {
+                _module = {
+                  check = false;
+                  args = {inherit pkgs;};
+                };
+              }
+            ];
+          })
+          options
+          ;
+        documentType = "none";
+        warningsAreErrors = false;
       };
     in rec {
       frontend = pkgs.buildNpmPackage rec {
@@ -146,6 +169,10 @@
         '';
 
       default = full;
+
+      "nixosModuleDocs/asciiDoc" = nixosOptionsDoc.optionsAsciiDoc;
+      "nixosModuleDocs/commonMark" = nixosOptionsDoc.optionsCommonMark;
+      "nixosModuleDocs/json" = nixosOptionsDoc.optionsJSON;
     };
   };
 }
