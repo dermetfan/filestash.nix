@@ -63,7 +63,7 @@
         };
       };
 
-      backend = pkgs.buildGo121Module {
+      backend = pkgs.buildGo122Module {
         pname = "filestash-backend";
         inherit src version;
 

@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = github:NixOS/nixpkgs/nixos-24.05;
+    nixpkgs.url = github:NixOS/nixpkgs/nixos-24.11;
     parts = {
       url = github:hercules-ci/flake-parts;
       inputs.nixpkgs-lib.follows = "nixpkgs";
