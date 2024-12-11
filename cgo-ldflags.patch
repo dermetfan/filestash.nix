@@ -5,24 +5,52 @@ index 6b20e50b..2248c9be 100644
 @@ -4 +4 @@ package plg_image_c
 -// #cgo LDFLAGS: -l:libgif.a -l:libwebp.a
 +// #cgo LDFLAGS: -lgif -lwebp
-diff --git server/plugin/plg_image_c/image_jpeg.go server/plugin/plg_image_c/image_jpeg.go
+diff --git server/plugin/plg_image_c/image_jpeg_freebsd.go server/plugin/plg_image_c/image_jpeg_freebsd.go
+index 14c6879b..f86f1bae 100644
+--- server/plugin/plg_image_c/image_jpeg_freebsd.go
++++ server/plugin/plg_image_c/image_jpeg_freebsd.go
+@@ -4 +4 @@ package plg_image_c
+-// #cgo LDFLAGS: -L /usr/local/lib -L /usr/lib -L /lib -l:libjpeg.a
++// #cgo LDFLAGS: -L /usr/local/lib -L /usr/lib -L /lib -ljpeg
+diff --git server/plugin/plg_image_c/image_jpeg_linux.go server/plugin/plg_image_c/image_jpeg_linux.go
 index 235e4139..53d187f1 100644
---- server/plugin/plg_image_c/image_jpeg.go
-+++ server/plugin/plg_image_c/image_jpeg.go
+--- server/plugin/plg_image_c/image_jpeg_linux.go
++++ server/plugin/plg_image_c/image_jpeg_linux.go
 @@ -4 +4 @@ package plg_image_c
 -// #cgo LDFLAGS: -l:libjpeg.a
 +// #cgo LDFLAGS: -ljpeg
-diff --git server/plugin/plg_image_c/image_png.go server/plugin/plg_image_c/image_png.go
+diff --git server/plugin/plg_image_c/image_png_freebsd.go server/plugin/plg_image_c/image_png_freebsd.go
+index 22384c87..aa7105af 100644
+--- server/plugin/plg_image_c/image_png_freebsd.go
++++ server/plugin/plg_image_c/image_png_freebsd.go
+@@ -4 +4 @@ package plg_image_c
+-// #cgo LDFLAGS: -L /usr/local/lib -L /usr/lib -L /lib -l:libsharpyuv.a -l:libpng.a -l:libz.a -l:libwebp.a -l:libpthread.a -fopenmp
++// #cgo LDFLAGS: -L /usr/local/lib -L /usr/lib -L /lib -lsharpyuv -lpng -lz -lwebp -lpthread -fopenmp
+diff --git server/plugin/plg_image_c/image_png_linux.go server/plugin/plg_image_c/image_png_linux.go
 index e87acdaf..a2d43b2b 100644
---- server/plugin/plg_image_c/image_png.go
-+++ server/plugin/plg_image_c/image_png.go
+--- server/plugin/plg_image_c/image_png_linux.go
++++ server/plugin/plg_image_c/image_png_linux.go
 @@ -4 +4 @@ package plg_image_c
 -// #cgo LDFLAGS: -l:libpng.a -l:libz.a -l:libwebp.a -fopenmp
 +// #cgo LDFLAGS: -lpng -lz -lwebp -fopenmp
-diff --git server/plugin/plg_image_c/image_raw.go server/plugin/plg_image_c/image_raw.go
+diff --git server/plugin/plg_image_c/image_psd.go server/plugin/plg_image_c/image_psd.go
+index c9786a1a..82f28eaa 100644
+--- server/plugin/plg_image_c/image_psd.go
++++ server/plugin/plg_image_c/image_psd.go
+@@ -4 +4 @@ package plg_image_c
+-// #cgo LDFLAGS: -l:libwebp.a
++// #cgo LDFLAGS: -lwebp
+diff --git server/plugin/plg_image_c/image_raw_freebsd.go server/plugin/plg_image_c/image_raw_freebsd.go
+index d95a667d..6368f7d1 100644
+--- server/plugin/plg_image_c/image_raw_freebsd.go
++++ server/plugin/plg_image_c/image_raw_freebsd.go
+@@ -4 +4 @@ package plg_image_c
+-// #cgo LDFLAGS: -L /usr/local/lib -L /usr/lib -L /lib -l:libyuv.a -l:libjpeg.a -l:libraw.a -fopenmp -l:libc++.a -llcms2 -lm
++// #cgo LDFLAGS: -L /usr/local/lib -L /usr/lib -L /lib -lyuv -ljpeg -lraw -fopenmp -l:libc++.a -llcms2 -lm
+diff --git server/plugin/plg_image_c/image_raw_linux.go server/plugin/plg_image_c/image_raw_linux.go
 index e9a0774f..36f1eb7f 100644
---- server/plugin/plg_image_c/image_raw.go
-+++ server/plugin/plg_image_c/image_raw.go
+--- server/plugin/plg_image_c/image_raw_linux.go
++++ server/plugin/plg_image_c/image_raw_linux.go
 @@ -4 +4 @@ package plg_image_c
 -// #cgo LDFLAGS: -l:libjpeg.a -l:libraw.a -fopenmp -l:libstdc++.a -llcms2 -lm
 +// #cgo LDFLAGS: -ljpeg -lraw -fopenmp -l:libstdc++.a -llcms2 -lm

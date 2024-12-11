@@ -1,0 +1,9 @@
+diff --git server/plugin/plg_image_c/image_psd.c server/plugin/plg_image_c/image_psd.c
+index a5a2184c..b1603243 100644
+--- server/plugin/plg_image_c/image_psd.c
++++ server/plugin/plg_image_c/image_psd.c
+@@ -2 +2 @@
+-#include "image_psd_vendor.h"
++#include <stb/stb_image.h>
+@@ -70 +69,0 @@ int psd_to_webp(int inputDesc, int outputDesc, int targetSize) {
+-  fprintf(stderr, "WRITEN[%d]", webp_output_size);

@@ -34,7 +34,7 @@
           ln --symbolic ${./package-lock.json} package-lock.json
         '';
 
-        npmDepsHash = "sha256-NX54LLtaIgbKWhkt6o17hhrK3CFzdDQiGVbUc5/HKes=";
+        npmDepsHash = "sha256-6RHXICYpuHhtnzb6Y/xDpOBSib4OlqT0lp1MzHQYa9g=";
         npmInstallFlags = "--legacy-peer-deps";
         makeCacheWritable = true;
 
@@ -63,7 +63,9 @@
         };
       };
 
-      backend = pkgs.buildGo122Module {
+      # `go.mod` specifies 1.21 but we need 1.23
+      # https://github.com/mickael-kerjean/filestash/issues/780
+      backend = pkgs.buildGo123Module {
         pname = "filestash-backend";
         inherit src version;
 
@@ -73,7 +75,7 @@
             mainProgram = "filestash";
           };
 
-        vendorHash = "sha256-cbpvwMt3Qp0lmcOrHtkOIFIo9NjstqC/wYUjkckV8f4=";
+        vendorHash = "sha256-N3ekB/6CzO6abs3MrdSWs0zqw8P6HKrVoKE3IWJcc+w=";
 
         ldflags = [
           "-X github.com/mickael-kerjean/filestash/server/common.BUILD_DATE=${toString src.lastModified}"
@@ -94,24 +96,31 @@
           libraw
           giflib
           libheif
+          stb
         ];
 
         nativeBuildInputs = with pkgs; [pkg-config gotools];
 
         prePatch = "cp --recursive ${frontend} server/ctrl/static/www";
 
-        patches = [./cgo-ldflags.patch];
+        patches = [
+          ./cgo-ldflags.patch
+          ./image-psd.patch
+        ];
         patchFlags = "--strip=0";
 
-        # fix "imported and not used" errors
-        postPatch = "goimports -w server";
+        postPatch = ''
+          # fix "imported and not used" errors
+          goimports -w server
+
+          # remove copy of ${pkgs.stb}/include/stb/stb_image.h
+          # that is no longer used due to ${./image-psd.patch}
+          rm server/plugin/plg_image_c/image_psd_vendor.h
+        '';
 
         preBuild = "go generate -x ./server/...";
 
-        postInstall = ''
-          rm $out/bin/public
-          mv $out/bin/{cmd,filestash}
-        '';
+        postInstall = "mv $out/bin/{cmd,filestash}";
       };
 
       full =
