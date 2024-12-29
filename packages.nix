@@ -34,7 +34,7 @@
           ln --symbolic ${./package-lock.json} package-lock.json
         '';
 
-        npmDepsHash = "sha256-6RHXICYpuHhtnzb6Y/xDpOBSib4OlqT0lp1MzHQYa9g=";
+        npmDepsHash = "sha256-V29B16yF2H6x/h00jTZMrXAm0QOnk3KVjROrgp5kcH8=";
         npmInstallFlags = "--legacy-peer-deps";
         makeCacheWritable = true;
 
@@ -75,7 +75,7 @@
             mainProgram = "filestash";
           };
 
-        vendorHash = "sha256-N3ekB/6CzO6abs3MrdSWs0zqw8P6HKrVoKE3IWJcc+w=";
+        vendorHash = "sha256-ycuf9aMqyNNhIeDVapywadidhvaUgK9/wVCvY+VDI+A=";
 
         ldflags = [
           "-X github.com/mickael-kerjean/filestash/server/common.BUILD_DATE=${toString src.lastModified}"
