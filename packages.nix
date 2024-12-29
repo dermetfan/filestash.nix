@@ -99,13 +99,19 @@
           stb
         ];
 
-        nativeBuildInputs = with pkgs; [pkg-config gotools];
+        nativeBuildInputs = with pkgs; [
+          pkg-config
+          gotools
+
+          makeBinaryWrapper
+        ];
 
         prePatch = "cp --recursive ${frontend} server/ctrl/static/www";
 
         patches = [
           ./cgo-ldflags.patch
           ./image-psd.patch
+          ./video-tmp.patch
         ];
         patchFlags = "--strip=0";
 
@@ -121,6 +127,13 @@
         preBuild = "go generate -x ./server/...";
 
         postInstall = "mv $out/bin/{cmd,filestash}";
+
+        preFixup = ''
+          wrapProgram $out/bin/filestash \
+            --suffix PATH : ${lib.makeBinPath (with pkgs; [
+            ffmpeg.bin # runtime dependency of `plg_video_thumbnail`
+          ])}
+        '';
       };
 
       full =

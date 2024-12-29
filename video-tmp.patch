@@ -1,0 +1,31 @@
+diff --git server/plugin/plg_video_thumbnail/index.go server/plugin/plg_video_thumbnail/index.go
+index b77b56a1..d4bea003 100644
+--- server/plugin/plg_video_thumbnail/index.go
++++ server/plugin/plg_video_thumbnail/index.go
+@@ -17 +17 @@ const (
+-	VideoCachePath = "data/cache/video-thumbnail/"
++	VideoCacheTmpPath = "video-thumbnail/"
+@@ -46 +46 @@ func init() {
+-		cachePath := GetAbsolutePath(VideoCachePath)
++		cachePath := GetAbsolutePath(TMP_PATH, VideoCacheTmpPath)
+@@ -66 +66 @@ func (this *ffmpegThumbnail) Generate(reader io.ReadCloser, ctx *App, res *http.
+-		cachePath = GetAbsolutePath(VideoCachePath, cacheName)
++		cachePath = GetAbsolutePath(TMP_PATH, VideoCacheTmpPath, cacheName)
+diff --git server/plugin/plg_video_transcoder/index.go server/plugin/plg_video_transcoder/index.go
+index 313bcfba..c15cbd05 100644
+--- server/plugin/plg_video_transcoder/index.go
++++ server/plugin/plg_video_transcoder/index.go
+@@ -26 +26 @@ const (
+-	VideoCachePath     = "data/cache/video/"
++	VideoCacheTmpPath  = "video/"
+@@ -82 +82 @@ func init() {
+-		cachePath := GetAbsolutePath(VideoCachePath)
++		cachePath := GetAbsolutePath(TMP_PATH, VideoCacheTmpPath)
+@@ -132 +132,2 @@ func hlsPlaylistHandler(reader io.ReadCloser, ctx *App, res *http.ResponseWriter
+-		VideoCachePath,
++		TMP_PATH,
++		VideoCacheTmpPath,
+@@ -182 +183,2 @@ func hlsTranscodeHandler(ctx *App, res http.ResponseWriter, req *http.Request) {
+-		VideoCachePath,
++		TMP_PATH,
++		VideoCacheTmpPath,
