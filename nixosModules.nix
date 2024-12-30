@@ -180,6 +180,7 @@ parts: rec {
                 (i: v: replaceSecret v.password_file ".connections[${toString i}].password")
                 cfg.settings.connections
               )}
+              chmod ug=r,o= "$RUNTIME_DIRECTORY"/config.json
             '';
         };
 
