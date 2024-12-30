@@ -1,0 +1,6 @@
+diff --git server/common/constants.go server/common/constants.go
+index 3fe6b1b6..2fabf355 100644
+--- server/common/constants.go
++++ server/common/constants.go
+@@ -9 +8,0 @@ import (
+-//go:generate go run ../generator/constants.go

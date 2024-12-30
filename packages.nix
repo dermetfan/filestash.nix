@@ -112,6 +112,9 @@
           ./cgo-ldflags.patch
           ./image-psd.patch
           ./video-tmp.patch
+
+          # Without this, our `-X` in `ldflags` are overridden.
+          ./no-generator-constants.patch
         ];
         patchFlags = "--strip=0";
 
