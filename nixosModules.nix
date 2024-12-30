@@ -118,6 +118,9 @@ parts: rec {
       };
 
       config = lib.mkIf cfg.enable {
+        # seems to be broken and logs ffmpeg errors on the backend
+        services.filestash.settings.features.video.enable_transcoder = lib.mkDefault false;
+
         systemd.services.${filestash} = {
           description = "Filestash";
           wantedBy = ["multi-user.target"];
