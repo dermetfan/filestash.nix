@@ -78,7 +78,7 @@
         vendorHash = "sha256-ycuf9aMqyNNhIeDVapywadidhvaUgK9/wVCvY+VDI+A=";
 
         ldflags = [
-          "-X github.com/mickael-kerjean/filestash/server/common.BUILD_DATE=${toString src.lastModified}"
+          "-X github.com/mickael-kerjean/filestash/server/common.BUILD_DATE=${toString src.lastModifiedDate}"
           "-X github.com/mickael-kerjean/filestash/server/common.BUILD_REF=${src.rev}"
         ];
 
