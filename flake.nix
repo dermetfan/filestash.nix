@@ -9,17 +9,14 @@
       url = github:mickael-kerjean/filestash;
       flake = false;
     };
+    systems.url = github:nix-systems/default;
   };
 
-  outputs = inputs @ {parts, ...}:
+  outputs = inputs @ {parts, systems, ...}:
     parts.lib.mkFlake {
       inherit inputs;
     } ({lib, ...}: {
-      systems = [
-        "x86_64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
-      ];
+      systems = import systems;
 
       imports = [
         ./packages.nix
