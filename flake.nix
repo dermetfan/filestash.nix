@@ -12,7 +12,11 @@
     systems.url = github:nix-systems/default;
   };
 
-  outputs = inputs @ {parts, systems, ...}:
+  outputs = inputs @ {
+    parts,
+    systems,
+    ...
+  }:
     parts.lib.mkFlake {
       inherit inputs;
     } ({lib, ...}: {
