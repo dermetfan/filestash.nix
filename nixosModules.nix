@@ -27,6 +27,10 @@ parts: rec {
             type = types.path;
             default = "/run/${filestash}/config.json";
           };
+          plugins = mkOption {
+            type = types.path;
+            default = "/run/${filestash}/plugins";
+          };
           db = mkOption {
             type = types.path;
             default = "/var/lib/${filestash}/db";
@@ -146,6 +150,7 @@ parts: rec {
               pathConfig = cfg.paths.config;
               pathDb = cfg.paths.db;
               pathLog = cfg.paths.log;
+              pathPlugins = cfg.paths.plugins;
               pathSearch = cfg.paths.search;
               pathCert = cfg.paths.cert;
               pathTmp = cfg.paths.tmp;
@@ -168,7 +173,7 @@ parts: rec {
               '';
           in
             ''
-              mkdir --parents ${with cfg.paths; lib.escapeShellArgs [db log search tmp]}
+              mkdir --parents ${with cfg.paths; lib.escapeShellArgs [db log plugins search tmp]}
             ''
             + lib.optionalString (cfg.paths.config == opts.paths.config.default) ''
               cp "$CONFIGURATION_DIRECTORY"/config.json "$RUNTIME_DIRECTORY"/config.json

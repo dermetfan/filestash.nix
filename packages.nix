@@ -34,7 +34,7 @@
           ln --symbolic ${./package-lock.json} package-lock.json
         '';
 
-        npmDepsHash = "sha256-V29B16yF2H6x/h00jTZMrXAm0QOnk3KVjROrgp5kcH8=";
+        npmDepsHash = "sha256-0idHEfAmeMMrOxgtYpn43CrpbvEU6E68nWcA8bhXXNo=";
         npmInstallFlags = "--legacy-peer-deps";
         makeCacheWritable = true;
 
@@ -63,9 +63,7 @@
         };
       };
 
-      # `go.mod` specifies 1.21 but we need 1.23
-      # https://github.com/mickael-kerjean/filestash/issues/780
-      backend = pkgs.buildGo123Module {
+      backend = pkgs.buildGoModule {
         pname = "filestash-backend";
         inherit src version;
 
@@ -75,7 +73,7 @@
             mainProgram = "filestash";
           };
 
-        vendorHash = "sha256-ycuf9aMqyNNhIeDVapywadidhvaUgK9/wVCvY+VDI+A=";
+        vendorHash = "sha256-pI9BGqFOncwoj1B8cvB9cTqLa3dLGvN0oZ8lE9a1CsU=";
 
         ldflags = [
           "-X github.com/mickael-kerjean/filestash/server/common.BUILD_DATE=${toString src.lastModifiedDate}"
@@ -148,6 +146,7 @@
           pathConfig = "/proc/self/cwd/state/config.json";
           pathDb = "/proc/self/cwd/state/db";
           pathLog = "/proc/self/cwd/state/log";
+          pathPlugins = "/proc/self/cwd/state/plugins";
           pathSearch = "/proc/self/cwd/state/search";
           pathCert = "/proc/self/cwd/state/certs";
           pathTmp = "/proc/self/cwd/cache";
@@ -161,13 +160,14 @@
           pushd $out/libexec/filestash
 
           mkdir --parents state/config
-          ln --symbolic ${frontend}   public
-          ln --symbolic "$pathConfig" state/config/config.json
-          ln --symbolic "$pathDb"     state/db
-          ln --symbolic "$pathLog"    state/log
-          ln --symbolic "$pathSearch" state/search
-          ln --symbolic "$pathCert"   state/certs
-          ln --symbolic "$pathTmp"    cache
+          ln --symbolic ${frontend}    public
+          ln --symbolic "$pathConfig"  state/config/config.json
+          ln --symbolic "$pathDb"      state/db
+          ln --symbolic "$pathLog"     state/log
+          ln --symbolic "$pathPlugins" state/plugins
+          ln --symbolic "$pathSearch"  state/search
+          ln --symbolic "$pathCert"    state/certs
+          ln --symbolic "$pathTmp"     cache
         '';
 
       default = full;

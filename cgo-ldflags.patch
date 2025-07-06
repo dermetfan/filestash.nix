@@ -54,13 +54,6 @@ index e9a0774f..36f1eb7f 100644
 @@ -4 +4 @@ package plg_image_c
 -// #cgo LDFLAGS: -l:libjpeg.a -l:libraw.a -fopenmp -l:libstdc++.a -llcms2 -lm
 +// #cgo LDFLAGS: -ljpeg -lraw -fopenmp -l:libstdc++.a -llcms2 -lm
-diff --git server/plugin/plg_image_c/image_tiff.go server/plugin/plg_image_c/image_tiff.go
-index 0fc770e8..284e1f00 100644
---- server/plugin/plg_image_c/image_tiff.go
-+++ server/plugin/plg_image_c/image_tiff.go
-@@ -4 +4 @@ package plg_image_c
--// #cgo LDFLAGS: -l:libwebp.a -ltiff
-+// #cgo LDFLAGS: -lwebp -ltiff
 diff --git server/plugin/plg_image_c/image_webp.go server/plugin/plg_image_c/image_webp.go
 index 631f973b..e09755fc 100644
 --- server/plugin/plg_image_c/image_webp.go
